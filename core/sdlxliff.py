@@ -68,5 +68,4 @@ if __name__ == '__main__':
     to_bytes = bytes(file, 'UTF-8')
     sdlxliff = SdlXliff(to_bytes)
 
-    result = sdlxliff.find_mid(17)
-    print(result)
+    
