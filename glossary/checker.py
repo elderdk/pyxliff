@@ -62,7 +62,7 @@ def _lookin(source_term, target_term, segment):
     
 
 # Codes here should do the actual checking.
-def check(sdlxliff, glossary):
+def check(sdlxliff, glossary, ignore_list):
     # sdlxliff will come as a SdlXliff object with .source and .target.
     # glossary will come as a pandas dataframe
     
@@ -71,6 +71,9 @@ def check(sdlxliff, glossary):
         for row_num, row in glossary.iterrows():
 
             source_term, target_term = row[0], row[1]
+
+            if source_term in ignore_list:
+                continue
             
             problem = _lookin(source_term,target_term, segment)
 

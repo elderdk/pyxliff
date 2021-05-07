@@ -5,10 +5,11 @@ from core.sdlxliff import SdlXliff
 
 class GlossaryChecker:
 
-    def __init__(self, sdlxliff, glossary):
+    def __init__(self, sdlxliff, glossary, ignore_list):
         self._info = [sdlxliff, glossary]
         self._sdlxliff = self._import_sdlxliff(sdlxliff)
         self._glossary = self._import_glossary(glossary)
+        self._ignore_list = ignore_list.split(',')
 
     def _import_sdlxliff(self, sdlxliff):
         file = open(sdlxliff, encoding='UTF-8').read()
@@ -22,7 +23,7 @@ class GlossaryChecker:
         return self._sdlxliff.segments
 
     def check(self):
-        check(self._sdlxliff, self._glossary)
+        check(self._sdlxliff, self._glossary, self._ignore_list)
 
     def __repr__(self):
         return f"""
