@@ -40,6 +40,12 @@ class TermSegmentGroup:
 
 def _lookin(source_term, target_term, segment):
 
+    if not all([
+        isinstance(source_term, str),
+        isinstance(target_term, str),
+    ]):
+        return False
+
     source_term = source_term.split('|')
     target_term = target_term.split('|')
     source_segment = segment.source.lower()
@@ -70,11 +76,7 @@ def check(sdlxliff, glossary):
 
             if problem:
                 print(
-                    f"""
-                    {segment.mid}: {source_term}, {target_term}
-                    {segment.source}
-                    {segment.target}
-                    """
+                    f"{segment.mid}: {source_term}, {target_term}"
                     )
                 i += 1
     print(f'total of {i} problems found.')

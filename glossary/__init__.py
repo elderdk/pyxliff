@@ -11,7 +11,7 @@ class GlossaryChecker:
         self._glossary = self._import_glossary(glossary)
 
     def _import_sdlxliff(self, sdlxliff):
-        file = open(sdlxliff).read()
+        file = open(sdlxliff, encoding='UTF-8').read()
         return SdlXliff(bytes(file, 'UTF-8'))
 
     def _import_glossary(self, glossary):
