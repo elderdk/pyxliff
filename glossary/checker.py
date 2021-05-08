@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 
 class TermSegmentGroup:
     """Object that sets up the individual terms and segments for comparison.
@@ -71,6 +73,7 @@ class TermSegmentGroup:
             not self._term_found_in_source
         )
 
+
 def _lookin(source_term, target_term, segment):
     """Function that looks into each segment and determines if term is used correctly.
 
@@ -131,8 +134,9 @@ def check(sdlxliff, glossary, ignore_list):
         splitted in _lookin function.
 
     """
-
+    Problem = namedtuple('Problem', 'mid,source_term,target_term'.split(','))
     i = 0
+    result = []
     for segment in sdlxliff.segments:
         for row_num, row in glossary.iterrows():
 
@@ -144,11 +148,10 @@ def check(sdlxliff, glossary, ignore_list):
             problem = _lookin(source_term,target_term, segment)
 
             if problem:
-                print(
-                    f"{segment.mid}: {source_term}, {target_term}"
-                    )
+                result.append(Problem(segment.mid, source_term, target_term))
                 i += 1
     print(f'total of {i} problems found.')
+    return result
 
 if __name__ == '__main__':
     pass

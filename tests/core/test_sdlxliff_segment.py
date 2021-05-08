@@ -1,14 +1,4 @@
-import glob
-import pytest
-
-from core.sdlxliff import SdlXliff
-
-
-@pytest.fixture
-def sdlxliff():
-    file = open(glob.glob('./tests/testdata/*.sdlxliff')[0]).read()
-    sdlxliff = SdlXliff(bytes(file, 'UTF-8'))
-    return sdlxliff
+from pyxliff.tests.fixtures import sdlxliff
 
 
 def test_sdlxliff_loading(sdlxliff):
