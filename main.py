@@ -13,8 +13,8 @@ ignore_list = '게,번,란'
 if __name__=='__main__':
 
     gc = GlossaryChecker(
-        current_sdlxliff, 
-        current_glossary, 
+        test_sdlxliff, 
+        test_glossary, 
         ignore_list    
     )
     gc.check()
