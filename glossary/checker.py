@@ -1,5 +1,38 @@
 
 class TermSegmentGroup:
+    """Object that sets up the individual terms and segments for comparison.
+
+    This object takes the source and target terms from one row of the glossary,
+    and prepare it to be compared with an individual source and target segment pair.
+    It has properties designed to easily distinguish the comparison result.
+
+    Parameters
+    ----------
+    source_terms : list
+        List of terms. Since _lookin splits the term with '|', the terms will come
+        as a list even if there is only one term.
+
+    target_terms : list
+        Same as source_terms.
+
+    source_segment : str
+        String of source segment.
+    
+    target_segment : str
+        Same as source_segment.
+
+
+    Attributes
+    ----------
+    found_in_source_but_not_in_target : bool
+        A source term is found in the source segment but the corresponding target term
+        is not found in the target segment, indicating the possibility that
+        an incorrect term has been used.
+
+    not_found_in_source : bool
+        Self explanatory. To be used to tell _lookin to skip the term.
+    
+    """
 
     def __init__(self, source_terms, target_terms, source_segment, target_segment):
         self._source_terms = source_terms
@@ -39,6 +72,22 @@ class TermSegmentGroup:
         )
 
 def _lookin(source_term, target_term, segment):
+    """Function that looks into each segment and determines if term is used correctly.
+
+    This function looks into each segment and determines if the source term is used in the source
+    segment and if so, checks if the target term is used in the segment target.
+
+    Parameters
+    ----------
+    source_term : str
+    target_term : str
+    segment : Segment object
+
+    Returns
+    -------
+    bool
+
+    """
 
     if not all([
         isinstance(source_term, str),
@@ -46,13 +95,13 @@ def _lookin(source_term, target_term, segment):
     ]):
         return False
 
-    source_term = source_term.split('|')
-    target_term = target_term.split('|')
+    source_terms = source_term.split('|')
+    target_terms = target_term.split('|')
     source_segment = segment.source.lower()
     target_segment = segment.target.lower()
 
     tsg = TermSegmentGroup(
-        source_term, target_term, source_segment, target_segment
+        source_terms, target_terms, source_segment, target_segment
         )
 
     if tsg.not_found_in_source:
@@ -61,11 +110,28 @@ def _lookin(source_term, target_term, segment):
         return True
     
 
-# Codes here should do the actual checking.
 def check(sdlxliff, glossary, ignore_list):
-    # sdlxliff will come as a SdlXliff object with .source and .target.
-    # glossary will come as a pandas dataframe
-    
+    """Main function that does the glossary checking.
+
+    This is the main function used by the GlossaryChecker object. It processes each segment,
+    and for each segment, it loops all the glossary terms in the glossary file.
+    The _lookin function investigates to see if the segment.source contains the source term,
+    and if so, checks if the corresponding target term has been used in the segment.target.
+    If the target term is not found, _lookin returns True (varluable: problem) and
+    prints out an error message.
+
+    Parameters
+    ----------
+    sdlxliff : SdlXliff object
+        SdlXliff object that contains source and target segments.
+
+    glossary : Pandas DataFrame
+        Pandas DataFrame object that contains source and target terms.
+        Duplicate terms are concanated in one cell, joined by '|' which is then
+        splitted in _lookin function.
+
+    """
+
     i = 0
     for segment in sdlxliff.segments:
         for row_num, row in glossary.iterrows():

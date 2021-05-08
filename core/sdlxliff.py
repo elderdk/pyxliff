@@ -20,6 +20,7 @@ class SdlXliff:
         sdlxliff : str
             The string representation of the sdlxliff file.
             Make sure to pass it in a string format.
+            It should be only one file.
             
             Example
 
@@ -54,7 +55,7 @@ class SdlXliff:
 
         Returns
         -------
-        Segment
+        A matching Segment object
         
         """
         for segment in self.segments:
