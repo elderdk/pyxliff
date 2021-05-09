@@ -119,11 +119,22 @@ def check(sdlxliff, glossary, ignore_list):
 
     """
     
+    import time
+    start_time= time.time()
     products = product(
         sdlxliff.segments, 
         [row for row in glossary.iterrows() if row[1][0] not in ignore_list],
         repeat=1
         )
+    print(f"{time.time() - start_time} seconds")
+
+    # test the below with above with a big glossary file and a sdlxliff and see which performs better.
+
+    # import time
+    # start_time= time.time()
+    # rows = [row for row in glossary.iterrows() if row[1][0] not in ignore_list]
+    # products = ((segment, row) for segment in sdlxliff.segments for row in rows)
+    # print(f"{time.time() - start_time} seconds")
 
     with multiprocessing.Pool() as pool:
         results = [
