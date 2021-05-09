@@ -25,7 +25,7 @@ if __name__=='__main__':
 
 # add decouple for test files so they are not all over the place
 # make output selection function (print to screen, make csv or excel, or both)
-# add threading or multiprocess to make it faster ()
+
 # mid is still not picking up correctly
 # make a function that checks for a specific word or words
 # ability to distinguish different apostrphes

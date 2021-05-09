@@ -1,4 +1,9 @@
 from collections import namedtuple
+import multiprocessing
+from itertools import product
+
+
+Problem = namedtuple('Problem', 'mid,source_term,target_term'.split(','))
 
 
 class TermSegmentGroup:
@@ -39,14 +44,14 @@ class TermSegmentGroup:
     def __init__(self, source_terms, target_terms, source_segment, target_segment):
         self._source_terms = source_terms
         self._target_terms = target_terms
-        self._source_segment = source_segment.lower()
-        self._target_segment = target_segment.lower()
+        self._source_segment = source_segment
+        self._target_segment = target_segment
 
     @property
     def _term_found_in_source(self):
         return any(
             [
-                term.lower() in self._source_segment 
+                term in self._source_segment 
                 for term in self._source_terms
                 ]
             )
@@ -55,7 +60,7 @@ class TermSegmentGroup:
     def _term_found_in_target(self):
         return any(
             [
-                term.lower() in self._target_segment 
+                term in self._target_segment 
                 for term in self._target_terms
                 ]
             )
@@ -74,54 +79,33 @@ class TermSegmentGroup:
         )
 
 
-def _lookin(source_term, target_term, segment):
-    """Function that looks into each segment and determines if term is used correctly.
+def seg_looper(segment, row):
 
-    This function looks into each segment and determines if the source term is used in the source
-    segment and if so, checks if the target term is used in the segment target.
+    row_contents = row[1]
 
-    Parameters
-    ----------
-    source_term : str
-    target_term : str
-    segment : Segment object
+    data = {
+    'source_terms': [term.lower() for term in row_contents[0].split('|')],
+    'target_terms': [term.lower() for term in row_contents[1].split('|')],
+    'source_segment': segment.source.lower(),
+    'target_segment': segment.target.lower()
+    }
 
-    Returns
-    -------
-    bool
+    tsg = TermSegmentGroup(**data)
 
-    """
+    if tsg.found_in_source_but_not_in_target:
+        return Problem(segment.mid, data['source_terms'], data['target_terms'])
 
-    if not all([
-        isinstance(source_term, str),
-        isinstance(target_term, str),
-    ]):
-        return False
-
-    source_terms = source_term.split('|')
-    target_terms = target_term.split('|')
-    source_segment = segment.source.lower()
-    target_segment = segment.target.lower()
-
-    tsg = TermSegmentGroup(
-        source_terms, target_terms, source_segment, target_segment
-        )
-
-    if tsg.not_found_in_source:
-        return False
-    elif tsg.found_in_source_but_not_in_target:
-        return True
-    
 
 def check(sdlxliff, glossary, ignore_list):
     """Main function that does the glossary checking.
-
-    This is the main function used by the GlossaryChecker object. It processes each segment,
-    and for each segment, it loops all the glossary terms in the glossary file.
-    The _lookin function investigates to see if the segment.source contains the source term,
-    and if so, checks if the corresponding target term has been used in the segment.target.
-    If the target term is not found, _lookin returns True (varluable: problem) and
-    prints out an error message.
+    
+    This function uses multiprocessing to speed up the process. It first uses itertools'
+    product() function to create a generator that yields tuples with a sdlxliff.segment object
+    and a Pandas DataSeries (called row). Then the multiprocessor.Pool().starmap is used
+    to pass each tuple to the seg_looper() which uses lookin() to determine if
+    the source term is in the source segment but target term is not in the target segment.
+    If a problem is found, the starmap() will return a Problem namedtuple object which are
+    apended to the results list.
 
     Parameters
     ----------
@@ -134,24 +118,22 @@ def check(sdlxliff, glossary, ignore_list):
         splitted in _lookin function.
 
     """
-    Problem = namedtuple('Problem', 'mid,source_term,target_term'.split(','))
-    i = 0
-    result = []
-    for segment in sdlxliff.segments:
-        for row_num, row in glossary.iterrows():
+    
+    products = product(
+        sdlxliff.segments, 
+        [row for row in glossary.iterrows() if row[1][0] not in ignore_list],
+        repeat=1
+        )
 
-            source_term, target_term = row[0], row[1]
+    with multiprocessing.Pool() as pool:
+        results = [
+            result for result in pool.starmap(seg_looper, products)
+            if result is not None
+            ]
 
-            if source_term in ignore_list:
-                continue
-            
-            problem = _lookin(source_term,target_term, segment)
 
-            if problem:
-                result.append(Problem(segment.mid, source_term, target_term))
-                i += 1
-    print(f'total of {i} problems found.')
-    return result
+    print(f'total of {len(results)} problems found.')
+    return results
 
 if __name__ == '__main__':
     pass

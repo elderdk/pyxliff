@@ -17,5 +17,5 @@ def sdlxliff():
 
 
 @pytest.fixture
-def glossary(sdlxliff):
+def glossary_checker(sdlxliff):
     return GlossaryChecker(TEST_SDLXLIFF, TEST_GLOSSARY, IGNORE_LIST)
