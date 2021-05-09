@@ -1,4 +1,5 @@
 from glossary.glossarychecker import GlossaryChecker
+import time
 
 test_sdlxliff = r"C:\Users\elder\Documents\python\pyxliff\pyxliff\tests\testdata\rok_const.sdlxliff"
 test_glossary = r"C:\Users\elder\Documents\python\pyxliff\pyxliff\tests\testdata\excel_glossary.xlsx"
@@ -11,6 +12,7 @@ ignore_list = '게,번,란'
 
 if __name__=='__main__':
 
+    start_time = time.time()
     gc = GlossaryChecker(
         test_sdlxliff, 
         test_glossary, 
@@ -18,6 +20,8 @@ if __name__=='__main__':
     )
     result = gc.check()
     print(result)
+    end_time = time.time()
+    print(f"Duration: {end_time - start_time} seconds")
 
 # add decouple for test files so they are not all over the place
 # make output selection function (print to screen, make csv or excel, or both)
