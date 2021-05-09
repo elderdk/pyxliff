@@ -83,6 +83,10 @@ def seg_looper(segment, row):
 
     row_contents = row[1]
 
+    # Some cells return NaN value, making it a float, not str, and skipped by the below if condition.
+    if not isinstance(row_contents[0], str) or not isinstance(row_contents[1], str):
+        return None
+
     data = {
     'source_terms': [term.lower() for term in row_contents[0].split('|')],
     'target_terms': [term.lower() for term in row_contents[1].split('|')],
@@ -144,7 +148,7 @@ def check(sdlxliff, glossary, ignore_list):
 
 
     print(f'total of {len(results)} problems found.')
-    return results
+    return sorted(results, key=lambda x: x.mid)
 
 if __name__ == '__main__':
     pass
