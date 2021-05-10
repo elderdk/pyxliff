@@ -8,7 +8,7 @@ current_sdlxliff = r"C:\Users\danielelder\Desktop\dump\lost_memories_update\0_So
 current_glossary = r"C:\Users\danielelder\Desktop\dump\20210507\lost_memories\신규 용어_확인 필요.xlsx"
 current_glossary_2 = r"C:\Users\danielelder\Desktop\dump\Crusade\termbase\RO_combined_2.xlsx"
 
-ignore_list = '게,번,란,회,나가,페르,제작,제련,염,괴'
+ignore_list = '게,번,란,회,나가,페르,제작,제련,염,괴,설정,보상,확인,강화,?,링,침묵,추가,월드맵,철,크로,완료,미니맵,꿀,북,시작,알,돌,셀,로그,스킬,카드,상자,책,보우,활,상자,직업,능력치'
 
 if __name__=='__main__':
 

@@ -83,16 +83,13 @@ def seg_looper(segment, row):
 
     row_contents = row[1]
 
-    # Some cells return NaN value, making it a float, not str, and skipped by the below if condition.
-    if not isinstance(row_contents[0], str) or not isinstance(row_contents[1], str):
-        return None
-
     data = {
     'source_terms': [term.lower() for term in row_contents[0].split('|')],
     'target_terms': [term.lower() for term in row_contents[1].split('|')],
     'source_segment': segment.source.lower(),
     'target_segment': segment.target.lower()
     }
+    
 
     tsg = TermSegmentGroup(**data)
 
@@ -122,30 +119,19 @@ def check(sdlxliff, glossary, ignore_list):
         splitted in _lookin function.
 
     """
-    
-    import time
-    start_time= time.time()
-    products = product(
-        sdlxliff.segments, 
-        [row for row in glossary.iterrows() if row[1][0] not in ignore_list],
-        repeat=1
-        )
-    print(f"{time.time() - start_time} seconds")
 
-    # test the below with above with a big glossary file and a sdlxliff and see which performs better.
-
-    # import time
-    # start_time= time.time()
-    # rows = [row for row in glossary.iterrows() if row[1][0] not in ignore_list]
-    # products = ((segment, row) for segment in sdlxliff.segments for row in rows)
-    # print(f"{time.time() - start_time} seconds")
+    rows = [
+        row for row in glossary.iterrows() 
+        if all(isinstance(row[1][0], str), isinstance(row[1][1], str)) and
+        not any([term in ignore_list for term in row[1][0].split('|')])
+        ]
+    products = ((segment, row) for segment in sdlxliff.segments for row in rows)
 
     with multiprocessing.Pool() as pool:
         results = [
             result for result in pool.starmap(seg_looper, products)
             if result is not None
             ]
-
 
     print(f'total of {len(results)} problems found.')
     return sorted(results, key=lambda x: x.mid)
