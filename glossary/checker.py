@@ -1,12 +1,24 @@
 from collections import namedtuple
 import multiprocessing
 from itertools import product
+import tqdm
 
 
 Problem = namedtuple('Problem', 'mid,source_term,target_term'.split(','))
 
 
 def seg_looper(segment, row):
+
+    def _found_in_source_but_not_in_target(data):
+        return any(
+            [
+                term in data['source_segment'] for term in data['source_terms']
+                ]
+            ) and not any(
+            [
+                term in data['target_segment'] for term in data['target_terms']
+                ]
+            )
 
     row_contents = row[1]
 
@@ -17,12 +29,7 @@ def seg_looper(segment, row):
     'target_segment': segment.target.lower()
     }
     
-    if (
-        # source term is found in the source segment
-        any([term in data['source_segment'] for term in data['source_terms']]) and
-        # but target term is not found in the target segment
-        not any([term in data['target_segment'] for term in data['target_terms']])
-        ):
+    if _found_in_source_but_not_in_target(data):
 
         return Problem(segment.mid, data['source_terms'], data['target_terms'])
 
@@ -58,13 +65,14 @@ def check(sdlxliff, glossary, ignore_list):
         ]
 
     # generator for the segment-row pair
-    products = ((segment, term) for segment in sdlxliff.segments for term in terms)
+    products = [(segment, term) for segment in sdlxliff.segments for term in terms]
 
     with multiprocessing.Pool() as pool:
+        
         results = [
-            result for result in pool.starmap(seg_looper, products)
-            if result is not None
+            result for result in pool.starmap(seg_looper, tqdm.tqdm(products, total=len(products))) if result is not None
             ]
+        
 
     print(f'total of {len(results)} problems found.')
     return sorted(results, key=lambda x: x.mid)

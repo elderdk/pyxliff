@@ -64,9 +64,5 @@ class SdlXliff:
 
 
 if __name__ == '__main__':
-
-    file = open(glob.glob('./pyxliff/tests/testdata/*.sdlxliff')[0]).read()
-    to_bytes = bytes(file, 'UTF-8')
-    sdlxliff = SdlXliff(to_bytes)
-
+    pass
     
