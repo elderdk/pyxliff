@@ -6,79 +6,6 @@ from itertools import product
 Problem = namedtuple('Problem', 'mid,source_term,target_term'.split(','))
 
 
-class TermSegmentGroup:
-    """Object that sets up the individual terms and segments for comparison.
-
-    This object takes the source and target terms from one row of the glossary,
-    and prepare it to be compared with an individual source and target segment pair.
-    It has properties designed to easily distinguish the comparison result.
-
-    Parameters
-    ----------
-    source_terms : list
-        List of terms. Since _lookin splits the term with '|', the terms will come
-        as a list even if there is only one term.
-
-    target_terms : list
-        Same as source_terms.
-
-    source_segment : str
-        String of source segment.
-    
-    target_segment : str
-        Same as source_segment.
-
-
-    Attributes
-    ----------
-    found_in_source_but_not_in_target : bool
-        A source term is found in the source segment but the corresponding target term
-        is not found in the target segment, indicating the possibility that
-        an incorrect term has been used.
-
-    not_found_in_source : bool
-        Self explanatory. To be used to tell _lookin to skip the term.
-    
-    """
-
-    def __init__(self, source_terms, target_terms, source_segment, target_segment):
-        self._source_terms = source_terms
-        self._target_terms = target_terms
-        self._source_segment = source_segment
-        self._target_segment = target_segment
-
-    @property
-    def _term_found_in_source(self):
-        return any(
-            [
-                term in self._source_segment 
-                for term in self._source_terms
-                ]
-            )
-
-    @property
-    def _term_found_in_target(self):
-        return any(
-            [
-                term in self._target_segment 
-                for term in self._target_terms
-                ]
-            )
-
-    @property
-    def found_in_source_but_not_in_target(self):
-        return (
-            self._term_found_in_source and
-            not self._term_found_in_target
-        )
-
-    @property
-    def not_found_in_source(self):
-        return (
-            not self._term_found_in_source
-        )
-
-
 def seg_looper(segment, row):
 
     row_contents = row[1]
@@ -90,10 +17,13 @@ def seg_looper(segment, row):
     'target_segment': segment.target.lower()
     }
     
+    if (
+        # source term is found in the source segment
+        any([term in data['source_segment'] for term in data['source_terms']]) and
+        # but target term is not found in the target segment
+        not any([term in data['target_segment'] for term in data['target_terms']])
+        ):
 
-    tsg = TermSegmentGroup(**data)
-
-    if tsg.found_in_source_but_not_in_target:
         return Problem(segment.mid, data['source_terms'], data['target_terms'])
 
 
@@ -120,12 +50,15 @@ def check(sdlxliff, glossary, ignore_list):
 
     """
 
-    rows = [
+    # get the rows that are not NaN and not included in the ignore_list
+    terms = [
         row for row in glossary.iterrows() 
-        if all(isinstance(row[1][0], str), isinstance(row[1][1], str)) and
+        if all([isinstance(row[1][0], str), isinstance(row[1][1], str)]) and
         not any([term in ignore_list for term in row[1][0].split('|')])
         ]
-    products = ((segment, row) for segment in sdlxliff.segments for row in rows)
+
+    # generator for the segment-row pair
+    products = ((segment, term) for segment in sdlxliff.segments for term in terms)
 
     with multiprocessing.Pool() as pool:
         results = [
