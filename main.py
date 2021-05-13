@@ -4,7 +4,7 @@ import time
 test_sdlxliff = r"tests/testdata/rok_const.sdlxliff"
 test_glossary = r"tests/testdata/excel_glossary.xlsx"
 
-current_sdlxliff = r"C:\Users\danielelder\Desktop\dump\lost_memories_update\0_Source\Studio\en-US\LanguageStd_2021.04.14.ver.xlsx.sdlxliff"
+current_sdlxliff = r"C:\Users\danielelder\Desktop\dump\lost_memories_update\0_Source\Studio\en-US\LanguageGameInfo_2021.04.15.ver.xlsx.sdlxliff"
 current_glossary = r"C:\Users\danielelder\Desktop\dump\20210507\lost_memories\신규 용어_확인 필요.xlsx"
 current_glossary_2 = r"C:\Users\danielelder\Desktop\dump\Crusade\termbase\RO_combined_2.xlsx"
 
@@ -14,13 +14,14 @@ if __name__=='__main__':
 
     start_time = time.time()
     gc = GlossaryChecker(
-        current_sdlxliff, 
-        current_glossary_2, 
+        test_sdlxliff, 
+        test_glossary, 
         ignore_list    
     )
     result = gc.check()
     from pprint import pprint as pp
     pp(result)
+    print(gc.most_common(3))
     end_time = time.time()
     print(f"Duration: {end_time - start_time} seconds")
 

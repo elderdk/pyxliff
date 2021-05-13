@@ -1,6 +1,7 @@
 from .maker import make
 from .checker import check
 from core.sdlxliff import SdlXliff
+from collections import Counter, defaultdict
 
 
 class GlossaryChecker:
@@ -36,6 +37,7 @@ class GlossaryChecker:
         self._sdlxliff = self._import_sdlxliff(sdlxliff)
         self._glossary = self._import_glossary(glossary)
         self._ignore_list = ignore_list.split(',')
+        self._check_result = None
 
     def _import_sdlxliff(self, sdlxliff):
         file = open(sdlxliff, encoding='UTF-8').read()
@@ -52,7 +54,21 @@ class GlossaryChecker:
     def check(self):
         """Calls the check function in checker.py
         """
-        return check(self._sdlxliff, self._glossary, self._ignore_list)
+        self._check_result = check(self._sdlxliff, self._glossary, self._ignore_list)
+        return self._check_result
+
+    def most_common(self, n):
+
+        if self._check_result is not None:
+            cnt = Counter()
+            for problem in self._check_result:
+                cnt[problem.source_term[0]] += 1
+
+        else:
+            self.check()
+            self.most_common(n)
+
+        return cnt.most_common(n)
 
     def __repr__(self):
         return f"""

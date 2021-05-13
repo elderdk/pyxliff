@@ -65,10 +65,8 @@ def check(sdlxliff, glossary, ignore_list):
         ]
 
     # list for the segment-row pair
-    import time
-    start_time = time.time()
     products = [(segment, term) for segment in sdlxliff.segments for term in terms]
-    print(f"Took {time.time() - start_time}")
+
     with multiprocessing.Pool() as pool:
         
         results = [
