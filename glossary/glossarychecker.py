@@ -12,36 +12,40 @@ class GlossaryChecker:
 
     This is the core object for glossary checking.
 
+
+    Parameters
+    ----------
+    sdlxliff : str
+        The string representation of the sdlxliff file path.
+        It should be only one file.
+
+    glossary : str
+        The string representation of the glossary file path.
+        For now, it supports only .xlsx files.
+        It should be only one file.
+
+    ignore_list : str
+        A string of words that should be ignored separated by a comma.
+
+    Attributes
+    ----------
+    segments : list
+        A list of Segment objects.
+
     Methods
     -------
     check()
         Returns CheckResult namedtuple containing the sdlxliff name
         and a list of Problem namedtuple.
 
-    most_common(n:int):
+    most_common(n:int)
         Returns the n number of most common Problem found, mainly
         to provide a visibility for recurring problems and false positives.
 
     """
 
     def __init__(self, sdlxliff, glossary, ignore_list):
-        """
 
-        Parameters
-        ----------
-        sdlxliff : str
-            The string representation of the sdlxliff file path.
-            It should be only one file.
-        
-        glossary : str
-            The string representation of the glossary file path.
-            For now, it supports only .xlsx files.
-            It should be only one file.
-
-        ignore_list : str
-            A string of words that should be ignored separated by a comma.
-
-        """
         self._info = [sdlxliff, glossary]
         self._sdlxliff = self._import_sdlxliff(sdlxliff)
         self._glossary = self._import_glossary(glossary)
@@ -53,8 +57,12 @@ class GlossaryChecker:
 
     def _import_glossary(self, glossary):
 
+        # return a DataFrame from a single xlsx file.
         if Path(glossary).is_file():
             return make(glossary)
+
+        # return a DataFrame from multiple xlsx files.
+        # raises exception if none found.
         elif Path(glossary).is_dir():
 
             glossaries = glob.glob(glossary + '/*.xlsx')
@@ -74,7 +82,6 @@ class GlossaryChecker:
 
     @property
     def segments(self):
-        """list: A list of segments which are Segment objects."""
         return self._sdlxliff.segments
 
     def check(self):
