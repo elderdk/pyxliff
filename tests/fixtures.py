@@ -11,9 +11,7 @@ IGNORE_LIST = '게'
 
 @pytest.fixture
 def sdlxliff():
-    file = open(TEST_SDLXLIFF, encoding='UTF-8').read()
-    sdlxliff = SdlXliff(bytes(file, 'UTF-8'))
-    return sdlxliff
+    return SdlXliff(TEST_SDLXLIFF)
 
 
 @pytest.fixture

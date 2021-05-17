@@ -2,12 +2,25 @@ from .maker import make
 from .checker import check
 from core.sdlxliff import SdlXliff
 from collections import Counter, defaultdict
+from pathlib import Path
+import glob
+from pandas import DataFrame
 
 
 class GlossaryChecker:
     """Core object for glossary checking.
 
     This is the core object for glossary checking.
+
+    Methods
+    -------
+    check()
+        Returns CheckResult namedtuple containing the sdlxliff name
+        and a list of Problem namedtuple.
+
+    most_common(n:int):
+        Returns the n number of most common Problem found, mainly
+        to provide a visibility for recurring problems and false positives.
 
     """
 
@@ -28,10 +41,6 @@ class GlossaryChecker:
         ignore_list : str
             A string of words that should be ignored separated by a comma.
 
-            Example
-
-                ignore_list = "apple,pear,banana"
-
         """
         self._info = [sdlxliff, glossary]
         self._sdlxliff = self._import_sdlxliff(sdlxliff)
@@ -43,7 +52,25 @@ class GlossaryChecker:
         return SdlXliff(sdlxliff)
 
     def _import_glossary(self, glossary):
-        return make(glossary)
+
+        if Path(glossary).is_file():
+            return make(glossary)
+        elif Path(glossary).is_dir():
+
+            glossaries = glob.glob(glossary + '/*.xlsx')
+
+            if glossaries is None or len(glossaries) == 0:
+                raise Exception("Could not find any glossary file in the path provided.")
+
+            combined_glossary = DataFrame()
+
+            for glossary in glossaries:
+                if combined_glossary.empty:
+                    combined_glossary = make(glossary)
+                else:
+                    combined_glossary = combined_glossary.append(make(glossary))
+
+            return combined_glossary
 
     @property
     def segments(self):
@@ -54,6 +81,7 @@ class GlossaryChecker:
         """Calls the check function in checker.py
         """
         self._check_result = check(self._sdlxliff, self._glossary, self._ignore_list)
+
         return self._check_result
 
     def most_common(self, n):
