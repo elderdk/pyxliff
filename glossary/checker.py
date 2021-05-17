@@ -70,11 +70,9 @@ def check(sdlxliff, glossary, ignore_list):
     with multiprocessing.Pool() as pool:
         
         results = [
-            result for result in pool.starmap(seg_looper, tqdm.tqdm(products, total=len(products))) if result is not None
+            result for result in pool.starmap(seg_looper, tqdm.tqdm(products, desc=sdlxliff.name, bar_format='{l_bar}{bar:20}{r_bar}{bar:-10b}', total=len(products))) if result is not None
             ]
-        
 
-    print(f'total of {len(results)} problems found.')
     return sorted(results, key=lambda x: x.mid)
 
 if __name__ == '__main__':

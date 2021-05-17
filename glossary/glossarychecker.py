@@ -40,8 +40,7 @@ class GlossaryChecker:
         self._check_result = None
 
     def _import_sdlxliff(self, sdlxliff):
-        file = open(sdlxliff, encoding='UTF-8').read()
-        return SdlXliff(bytes(file, 'UTF-8'))
+        return SdlXliff(sdlxliff)
 
     def _import_glossary(self, glossary):
         return make(glossary)

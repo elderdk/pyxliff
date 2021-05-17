@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import glob
 from .segment import Segment
+from pathlib import Path
 
 
 class SdlXliff:
@@ -30,7 +31,9 @@ class SdlXliff:
         
 
         """
-        self.__soup = BeautifulSoup(sdlxliff, 'lxml')
+        self._sdlxliff_name = Path(sdlxliff).name
+        self.__sdlxliff = self.__load_sdlxliff(sdlxliff)
+        self.__soup = BeautifulSoup(self.__sdlxliff, 'lxml')
 
     def __get_segments(self) -> list:
         return [
@@ -38,13 +41,22 @@ class SdlXliff:
            if unit.mrk
         ]
 
+    def __load_sdlxliff(self, sdlxliff):
+        fi = open(sdlxliff, encoding='UTF-8').read()
+        return bytes(fi, 'UTF-8')
+
     @property
     def segments(self) -> list:
         """list: A list of segments which are Segment objects. """
         return self.__get_segments()
 
-    def find_mid(self, mid: int) -> Segment:
-        """Returns a Segment object (segment) with the same mid number. 
+    @property
+    def name(self) -> str:
+        """str: The name of the sdlxliff file."""
+        return self._sdlxliff_name
+
+    def find_mid(self, mid: int) -> list:
+        """Returns a list of Segment objects (segment) with the same mid number. 
         
         Parameters
         ----------
@@ -58,10 +70,13 @@ class SdlXliff:
         A matching Segment object
         
         """
-        for segment in self.segments:
-            if segment.mid == int(mid):
-                return segment
+        return [segment for segment in self.segments if segment.mid == int(mid)]
 
+    def filter(self):
+        """
+        Returns a list of segments that 
+        """
+        pass
 
 if __name__ == '__main__':
     pass
