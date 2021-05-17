@@ -8,11 +8,29 @@ from glossary.glossarychecker import GlossaryChecker
 CheckResult = namedtuple('CheckResult', ['name', 'results'])
 
 class Loader:
-    """ Main loader to enable operation on multiple files.
+    """ Main loader to enable handling of multiple files.
     
     Loader class accepts single file or a folder of multiple sdlxliffs and returns a list.
     Operations such as filter or glossary checks then can be performed on all the sdlxliffs
     using for loop.
+
+    Parameters
+    ----------
+    sdlxliffs : str
+        str of file or directory.
+    glossary : str
+        str of file or directory
+    ignore_list : str
+        str of ignore_list with words separated by a comma.
+
+    Methods
+    -------
+    glossary_check()
+        Main method for glossary consistency check.
+        Checks if the target term is in the target segment if the source term
+        is in the source segment.
+
+
     """
 
     def __init__(self, sdlxliffs, glossary=None, ignore_list=None):
@@ -32,13 +50,21 @@ class Loader:
             else:
                 return files
 
-    def check(self):
+    def glossary_check(self):
+        """
+        
+        Yields
+        ------
+        CheckResult : namedtuple
+            Contains sdlxliff and list of Problem namedtuple.
+
+        """
         if self._glossary is None:
             raise Exception("At least one glossary excel file is required for glossary check.")
 
         for sdlxliff in self._sdlxliffs:
             gc = GlossaryChecker(sdlxliff, self._glossary, self._ignore_list)
-            result = CheckResult(sdlxliff, gc.check())
+            result = CheckResult(sdlxliff, gc.glossary_check())
             yield result
 
             
