@@ -3,6 +3,7 @@ import glob
 from collections import namedtuple
 
 from glossary.glossarychecker import GlossaryChecker
+from qa.length_checker import check_length
 
 
 CheckResult = namedtuple('CheckResult', ['name', 'results'])
@@ -50,7 +51,7 @@ class Loader:
             else:
                 return files
 
-    def glossary_check(self):
+    def check_glossary(self):
         """
         
         Yields
@@ -66,6 +67,16 @@ class Loader:
             gc = GlossaryChecker(sdlxliff, self._glossary, self._ignore_list)
             result = CheckResult(sdlxliff, gc.glossary_check())
             yield result
+
+    def check_length(self, **kwargs):
+        """
+
+        Yields
+        ------
+        
+        """
+        for sdlxliff in self._sdlxliffs:
+            yield check_length(sdlxliff, **kwargs)
 
             
 

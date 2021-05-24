@@ -84,7 +84,7 @@ class GlossaryChecker:
     def segments(self):
         return self._sdlxliff.segments
 
-    def check(self):
+    def glossary_check(self):
         """Calls the check function in checker.py
         """
         self._check_result = check(self._sdlxliff, self._glossary, self._ignore_list)
