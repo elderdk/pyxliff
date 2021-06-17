@@ -4,7 +4,7 @@ import time
 test_sdlxliff = r"tests/testdata/rok_const.sdlxliff"
 test_glossary = r"tests/testdata/excel_glossary.xlsx"
 
-current_sdlxliff = r"C:\Users\danielelder\Desktop\dump\lost_memories_update\0_Source\Studio\en-US\LanguageNonstopDialog_서브퀘스트(40000~60000)_2021.04.19.ver.xlsx.sdlxliff"
+current_sdlxliff = r"C:\Users\danielelder\J002_2021 The Lost Memories_KO2EN2PTBR_Additional\en-US"
 current_glossary = r"C:\Users\danielelder\Desktop\dump\20210507\lost_memories\신규 용어_확인 필요.xlsx"
 current_glossary_2 = r"C:\Users\danielelder\Desktop\dump\Crusade\termbase\RO_combined_2.xlsx"
 glossary_dir = r"C:\Users\danielelder\Desktop\dump\20210507\lost_memories"
@@ -17,25 +17,39 @@ if __name__=='__main__':
 
     loaded = Loader(
         current_sdlxliff, 
-        glossary_dir, 
-        ignore_list
+        current_glossary, 
+        ignore_list,
+        # writer="excel"
         )
 
     from pprint import pprint as pp
+
+    # check glossary
     # for result in loaded.check_glossary():
     #     pp(result[1])
+    
 
+    # check length
     for result in loaded.check_length(source_min = 20):
         pp(result)
         print(f"total {len(result)} found.")
+
+
+    # filter
+    # for result in loaded.rfilter(source='프론테라', target='^((?!Prontera).)*$'):
+    #     pp(result)
+
+    
     
     
     end_time = time.time()
     print(f"Duration: {end_time - start_time} seconds")
 
 
+# get random samplings for qa (doesn't trados already have this?)
+# why is midgard getting false positives?
+# implement multiprocessing for rfilter
 # make tests to ensure sdlxliff and glossary are imported correctly, i.e. single and multiple files
 # add decouple for test files so they are not all over the place (or make a json config file, or find out how config files are handled by other packages.)
-# make output selection function (print to screen, make csv or excel, or both)
-# make a function that checks for a specific word or words (using regex)
+# make documentation about output selection
 # ability to distinguish different apostrphes
