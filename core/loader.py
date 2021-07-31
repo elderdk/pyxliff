@@ -10,9 +10,10 @@ from core.writer import write
 
 CheckResult = namedtuple('CheckResult', ['name', 'results'])
 
+
 class Loader:
     """ Main loader to enable handling of multiple files.
-    
+
     Loader class accepts single file or a folder of multiple sdlxliffs and returns a list.
     Operations such as filter or glossary checks then can be performed on all the sdlxliffs
     using for loop.
@@ -44,7 +45,6 @@ class Loader:
         self._ignore_list = '' if ignore_list is None else ignore_list
         self._writer = writer
 
-    
     def _load(self, sdlxliffs):
         if Path(sdlxliffs).is_file():
             return [sdlxliffs]
@@ -55,13 +55,15 @@ class Loader:
                 raise Exception("Could not find any file in the path provided.")
             else:
                 return files
+        else:
+            raise Exception("The provided path does not exist.")
 
     def check_glossary(self):
         """ Main method for glossary consistency check.
 
         Checks if the target term is in the target segment if the source term
         is in the source segment.
-        
+
         Yields
         ------
         CheckResult : namedtuple
@@ -76,16 +78,14 @@ class Loader:
         for sdlxliff in self._sdlxliffs:
             gc = GlossaryChecker(sdlxliff, self._glossary, self._ignore_list)
             result = CheckResult(sdlxliff, gc.glossary_check())
-            
+
             if self._writer == "excel":
-               results.append(result)
+                results.append(result)
             else:
                 yield result
 
         if self._writer == "excel":
             write(results, self._writer)
-
-        
 
     def check_length(self, **kwargs):
         """ Checks and finds segments with length discrepancy greater than set values.

@@ -1,0 +1,2 @@
+go up one directory and run below:
+python -m pytest pyxliff/tests/
