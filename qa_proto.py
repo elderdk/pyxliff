@@ -1,14 +1,14 @@
 from core.sdlxliff import SdlXliff
-from collections import Counter, defaultdict
+from collections import defaultdict
 
-test_xliff = r"C:\Users\elder\Documents\python\pyxliff\pyxliff\tests\testdata\rok_const.sdlxliff"
-TEST_STRING = "피고인의 자백이 고문ㆍ폭행ㆍ협박"
-
+test_xliff = r"pyxliff/tests/testdata/rok_const.sdlxliff"
+FILE_NAME = './terms_found.txt'
 xliff = SdlXliff(test_xliff)
 
 
 def analyze_segment(text):
-    """ Creates a defaultdict(int) that shows the count of repeated words and phrases
+    """ Creates a defaultdict(int) that shows the count of repeated
+        words and phrases
 
     """
     d = defaultdict(int)
@@ -19,6 +19,26 @@ def analyze_segment(text):
                 if not key.startswith(' ') and not key.endswith(' '):
                     d[key] += 1
     return d
+
+
+def remove_partials(dd):
+
+    keys1 = [key for key in dd.keys()]
+    keys2 = [key for key in dd.keys()]
+
+    for key1 in keys1:
+        for key2 in keys2:
+            if key1 in key2 and key1 != key2 and key1 in dd:
+                dd.pop(key1)
+
+    return dd
+
+
+def make_txt(dd):
+    with open(FILE_NAME, mode='a') as f:
+        for k, v in dd.items():
+            f.write(f"{v}, {k}\n")
+
 
 def combined_analysis(xliffs: list):
     """ Loops through all xliffs to create analyzed defaultdicts
@@ -35,30 +55,13 @@ def combined_analysis(xliffs: list):
                 if len(k) > 1:
                     r[k] += v
 
-    r = {k: v for k, v in sorted(r.items(), key=lambda x: -x[1])}
+    r = {
+        k: v for k, v in sorted(r.items(), key=lambda x: -x[1])
+        if v > 1
+        }
 
-    return remove_partials(r)
+    make_txt(remove_partials(r))
 
-def remove_partials(dd):
-    # if dd key contains a space, check it through all other keys. If it's included in another key, remove the shorter one.
-    keys = [key for key in dd.keys()] 
 
-    for i in range(0, len(keys)):
-        for n in range(1, len(keys)):
-            
-            if (
-                not n > len(keys)+1 and
-                keys[i] in keys[i+n] and 
-                len(keys[i]) != len(keys[i+n]) and 
-                keys[i] in dd
-                ):
-                print(keys[i])
-                dd.pop(keys[i])
-
-    return dd
-
-r = combined_analysis([xliff])
-
-for k, v in r.items():
-    if v > 3:
-        print(v, k)
+if __name__ == '__main__':
+    combined_analysis([xliff])
