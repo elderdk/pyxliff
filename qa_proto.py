@@ -1,10 +1,18 @@
 from core.sdlxliff import SdlXliff
 from collections import defaultdict
+from pathlib import Path
 
-test_xliff = r"pyxliff/tests/testdata/rok_const.sdlxliff"
+test_xliff = r"C:\Users\danielelder\Documents\Studio 2019\Projects\제1차_자율주행_교통물류_기본계획_1\en-US\제1차_자율주행_교통물류_기본계획_prep.docx.sdlxliff"
+test_path = r"C:\Users\danielelder\Documents\Studio 2019\Projects\KAIDA - Safety standards\en-US\02. 연구원 담당자 검토자료\02. 연구원 담당자 검토자료"
 FILE_NAME = './terms_found.txt'
-xliff = SdlXliff(test_xliff)
 
+
+
+def get_files(path):
+    if Path(path).is_file():
+        return [SdlXliff(path)]
+    elif Path(path).is_dir():
+        return [SdlXliff(xliff) for xliff in Path(path).glob('*.sdlxliff')]
 
 def analyze_segment(text):
     """ Creates a defaultdict(int) that shows the count of repeated
@@ -35,9 +43,10 @@ def remove_partials(dd):
 
 
 def make_txt(dd):
-    with open(FILE_NAME, mode='a') as f:
+    with open(FILE_NAME, mode='a', encoding="utf-8") as f:
         for k, v in dd.items():
-            f.write(f"{v}, {k}\n")
+            if v > 2:
+                f.write(f"{v}\t{k}\n")
 
 
 def combined_analysis(xliffs: list):
@@ -64,4 +73,6 @@ def combined_analysis(xliffs: list):
 
 
 if __name__ == '__main__':
-    combined_analysis([xliff])
+    # need a progress bar for combined_analysis
+    # must implement multiprocessing with lock capability to prevent race condition
+    combined_analysis(get_files(test_path))
