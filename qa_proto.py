@@ -1,6 +1,7 @@
 from core.sdlxliff import SdlXliff
 from collections import defaultdict
 from pathlib import Path
+from pprint import pprint as pp
 
 test_xliff = r"C:\Users\danielelder\Documents\Studio 2019\Projects\제1차_자율주행_교통물류_기본계획_1\en-US\제1차_자율주행_교통물류_기본계획_prep.docx.sdlxliff"
 test_path = r"C:\Users\danielelder\Documents\Studio 2019\Projects\KAIDA - Safety standards\en-US\02. 연구원 담당자 검토자료\02. 연구원 담당자 검토자료"
@@ -39,7 +40,7 @@ def remove_partials(dd):
 
     keys1 = [key for key in dd.keys()]
     keys2 = [key for key in dd.keys()]
-
+    print(f"{len(keys1) * len(keys2)}")
     for key1 in keys1:
         for key2 in keys2:
             if key1 in key2 and key1 != key2 and key1 in dd:
@@ -51,11 +52,10 @@ def remove_partials(dd):
 def make_txt(dd):
     with open(FILE_NAME, mode='a', encoding="utf-8") as f:
         for k, v in dd.items():
-            if v > 2:
-                f.write(f"{v}\t{k}\n")
+            f.write(f"{v}\t{k}\n")
 
 
-def combined_analysis(xliffs: list):
+def combined_analysis(xliffs: list, min_match: int = 2, make_file: bool = True):
     """ Loops through all xliffs to create analyzed defaultdicts
 
     Loops through all xliffs to create analyzed defaultdicts and
@@ -72,13 +72,20 @@ def combined_analysis(xliffs: list):
 
     r = {
         k: v for k, v in sorted(r.items(), key=lambda x: -x[1])
-        if v > 1
+        if v >= min_match
         }
 
-    make_txt(remove_partials(r))
+    r = remove_partials(r)
+    if make_file:
+        make_txt(r)
+    else:
+        pp(r)
 
 
 if __name__ == '__main__':
     # need a progress bar for combined_analysis
     # must implement multiprocessing with lock capability to prevent race condition
-    combined_analysis(get_files(test_path))
+    combined_analysis(
+        get_files(rok_const),
+        min_match=3,
+        make_file=False)
