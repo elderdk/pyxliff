@@ -5,14 +5,20 @@ from pathlib import Path
 test_xliff = r"C:\Users\danielelder\Documents\Studio 2019\Projects\제1차_자율주행_교통물류_기본계획_1\en-US\제1차_자율주행_교통물류_기본계획_prep.docx.sdlxliff"
 test_path = r"C:\Users\danielelder\Documents\Studio 2019\Projects\KAIDA - Safety standards\en-US\02. 연구원 담당자 검토자료\02. 연구원 담당자 검토자료"
 FILE_NAME = './terms_found.txt'
-
+rok_const = r"pyxliff\tests\testdata\rok_const.sdlxliff"
 
 
 def get_files(path):
-    if Path(path).is_file():
+
+    path = Path(path)
+
+    if not path.exists():
+        raise FileNotFoundError
+
+    if path.is_file():
         return [SdlXliff(path)]
-    elif Path(path).is_dir():
-        return [SdlXliff(xliff) for xliff in Path(path).glob('*.sdlxliff')]
+    elif path.is_dir():
+        return [SdlXliff(xliff) for xliff in path.glob('*.sdlxliff')]
 
 def analyze_segment(text):
     """ Creates a defaultdict(int) that shows the count of repeated
