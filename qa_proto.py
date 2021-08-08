@@ -4,9 +4,10 @@ from pathlib import Path
 from pprint import pprint as pp
 
 test_xliff = r"C:\Users\danielelder\Documents\Studio 2019\Projects\제1차_자율주행_교통물류_기본계획_1\en-US\제1차_자율주행_교통물류_기본계획_prep.docx.sdlxliff"
-test_path = r"C:\Users\danielelder\Documents\Studio 2019\Projects\KAIDA - Safety standards\en-US\02. 연구원 담당자 검토자료\02. 연구원 담당자 검토자료"
+test_path = r"C:\Users\danielelder\Documents\Studio 2019\Projects\priority 2\en-US"
 FILE_NAME = './terms_found.txt'
 rok_const = r"pyxliff\tests\testdata\rok_const.sdlxliff"
+neo = r"C:\Users\danielelder\Documents\Studio 2019\Projects\200709_Log Analysis_Ragnarok Crusade - KO2EN\en-US"
 
 
 def get_files(path):
@@ -21,18 +22,25 @@ def get_files(path):
     elif path.is_dir():
         return [SdlXliff(xliff) for xliff in path.glob('*.sdlxliff')]
 
-def analyze_segment(text):
+def analyze_segment(text, max_loopkup_length):
     """ Creates a defaultdict(int) that shows the count of repeated
         words and phrases
 
     """
     d = defaultdict(int)
-    for n in range(2, len(text)):
+    last_entry = ''
+
+    for n in range(2, max_loopkup_length):
         for i in range(0, len(text)):
             if not i+n+1 > len(text):
                 key = text[i:i+n+1]
-                if not key.startswith(' ') and not key.endswith(' '):
+                if not key.startswith(' ') and not key.endswith(' '): #prevents same things from being added just becaus they are same when stripped
+                    if len(key) < 5 and ' ' in key: #if shorter than 6 but includes a space, it is considered a meaningless partial and skipped
+                        continue
                     d[key] += 1
+                    if last_entry != '' and last_entry in key and last_entry in d.keys(): # checks the last entry and if the current entry includes the last entry, it is deleted.
+                        d.pop(last_entry)
+                    last_entry = key
     return d
 
 
@@ -50,12 +58,12 @@ def remove_partials(dd):
 
 
 def make_txt(dd):
-    with open(FILE_NAME, mode='a', encoding="utf-8") as f:
+    with open(FILE_NAME, mode='w', encoding="utf-8") as f:
         for k, v in dd.items():
             f.write(f"{v}\t{k}\n")
 
 
-def combined_analysis(xliffs: list, min_match: int = 2, make_file: bool = True):
+def combined_analysis(xliffs: list, min_match: int = 2, max_loopkup_length: int = 50, make_file: bool = True):
     """ Loops through all xliffs to create analyzed defaultdicts
 
     Loops through all xliffs to create analyzed defaultdicts and
@@ -64,8 +72,9 @@ def combined_analysis(xliffs: list, min_match: int = 2, make_file: bool = True):
     r = defaultdict(int)
 
     for xliff in xliffs:
+        print(f"Working on {xliff}")
         for segment in xliff.segments:
-            d = analyze_segment(segment.source)
+            d = analyze_segment(segment.source, max_loopkup_length)
             for k, v in d.items():
                 if len(k) > 1:
                     r[k] += v
@@ -86,6 +95,7 @@ if __name__ == '__main__':
     # need a progress bar for combined_analysis
     # must implement multiprocessing with lock capability to prevent race condition
     combined_analysis(
-        get_files(rok_const),
-        min_match=3,
-        make_file=False)
+        get_files(test_path),
+        min_match=10,
+        max_loopkup_length = 50,
+        make_file=True)
