@@ -92,8 +92,7 @@ def combined_analysis(xliffs: list, min_match: int = 2, max_loopkup_length: int 
 
 
 if __name__ == '__main__':
-    # need a progress bar for combined_analysis
-    # must implement multiprocessing with lock capability to prevent race condition
+    # add context (20 chars before and after the find) to the dict
     combined_analysis(
         get_files(test_path),
         min_match=10,
