@@ -1,5 +1,4 @@
 from core.sdlxliff import SdlXliff
-from collections import defaultdict
 from pathlib import Path
 from pprint import pprint as pp
 
@@ -8,6 +7,10 @@ test_path = r"C:\Users\danielelder\Documents\Studio 2019\Projects\priority 2\en-
 FILE_NAME = './terms_found.txt'
 rok_const = r"pyxliff/tests/testdata/rok_const.sdlxliff"
 neo = r"C:\Users\danielelder\Documents\Studio 2019\Projects\200709_Log Analysis_Ragnarok Crusade - KO2EN\en-US"
+
+
+def get_context(text, key):
+    return text[text.index(key) - 20: text.index(key) + len(key) + 20]
 
 
 def get_files(path):
@@ -23,6 +26,7 @@ def get_files(path):
     elif path.is_dir():
         return [SdlXliff(xliff) for xliff in path.glob('*.sdlxliff')]
 
+
 def analyze_segment(text, max_lookup_length):
     """ Creates a defaultdict(int) that shows the count of repeated
         words and phrases
@@ -35,17 +39,17 @@ def analyze_segment(text, max_lookup_length):
         for i in range(0, len(text)):
             if not i+n+1 > len(text):
                 key = text[i:i+n+1]
-                if not key.startswith(' ') and not key.endswith(' '): #prevents same things from being added just becaus they are same when stripped
-                    if len(key) < 5 and ' ' in key: #if shorter than 6 but includes a space, it is considered a meaningless partial and skipped
+                if not key.startswith(' ') and not key.endswith(' '):  # prevents same things from being added just becaus they are same when stripped
+                    if len(key) < 5 and ' ' in key:  # if shorter than 6 but includes a space, it is considered a meaningless partial and skipped
                         continue
                     if key not in d.keys():
                         d[key] = dict()
                         d[key]['val'] = 1
-                        d[key]['context'] = text[text.index(key) - 20 : text.index(key) + len(key) + 20]
+                        d[key]['context'] = get_context(text, key)
                     else:
                         d[key]['val'] += 1
-                        d[key]['context'] = text[text.index(key) - 20 : text.index(key) + len(key) + 20]
-                    if last_entry != '' and last_entry in key and last_entry in d.keys(): # checks the last entry and if the current entry includes the last entry, it is deleted.
+                        d[key]['context'] = get_context(text, key)
+                    if last_entry != '' and last_entry in key and last_entry in d.keys():  # checks the last entry and if the current entry includes the last entry, it is deleted.
                         d.pop(last_entry)
                     last_entry = key
     return d
