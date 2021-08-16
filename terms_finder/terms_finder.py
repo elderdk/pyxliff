@@ -2,7 +2,9 @@ from .helpers import (
     get_files,
     remove_partials,
     make_txt,
-    analyze_segment
+    analyze_segment,
+    _make_tmp,
+    compare_and_compile_dict
 )
 from PyQt5.QtCore import QObject, pyqtSignal
 from pathlib import Path
@@ -30,7 +32,6 @@ class TermsFinder(QObject):
         self._make_file = make_file,
 
     def find_terms(self):
-        print("from find_terms", self._files)
         self.combined_analysis(
             get_files(self._files[0]),
             self._file_name[0],
@@ -45,25 +46,17 @@ class TermsFinder(QObject):
         Loops through all xliffs to create analyzed defaultdicts and
         return a sorted, combined defaultdict.
         """
-        r = dict()
+        tmpfile = _make_tmp()
 
         for xliff in xliffs:
-            for segment in xliff.segments:
-                d = analyze_segment(segment.source, max_lookup_length)
-                for k, v in d.items():
-                    if len(k) > 1:
-                        if k not in r.keys():
-                            r[k] = v
-                        else:
-                            r[k]['val'] += d[k]['val']
-            self.progressed.emit(xliffs.index(xliff) + 1)
-            self.termsFile.emit(str(xliff))
+            with tmpfile.open(mode='a') as f:
+                for segment in xliff.segments:
+                    analyze_segment(segment.source, max_lookup_length, f)
 
-        r = {
-            k: v for k, v in sorted(r.items(), key=lambda x: -x[1]['val'])
-            if v['val'] >= min_match
-            }
+                self.progressed.emit(xliffs.index(xliff) + 1)
+                self.termsFile.emit(str(xliff))
 
+        r = compare_and_compile_dict(min_match)
         r = remove_partials(r)
         if make_file and file_name is not None:
             make_txt(r, file_name)

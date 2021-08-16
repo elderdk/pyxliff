@@ -46,7 +46,6 @@ class Window(QMainWindow, Ui_Window):
                 self._files.append(file)
                 self.filesListWindow.addItem(file)
             self._filesCount = len(self._files)
-        print("from views", self._files)
 
     def findTerms(self):
         self._runFindTermsThread()
