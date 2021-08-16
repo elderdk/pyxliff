@@ -49,6 +49,7 @@ class TermsFinder(QObject):
         tmpfile = _make_tmp()
 
         for xliff in xliffs:
+            print("working on ", xliff)
             with tmpfile.open(mode='a') as f:
                 for segment in xliff.segments:
                     analyze_segment(segment.source, max_lookup_length, f)
@@ -57,7 +58,8 @@ class TermsFinder(QObject):
                 self.termsFile.emit(str(xliff))
 
         r = compare_and_compile_dict(min_match)
-        r = remove_partials(r)
+        print("length of r before remove_partials: ", len(r))
+        r = remove_partials(r)  # blocking for now because this is taking too long. Need to reduce the number of keys in r.
         if make_file and file_name is not None:
             make_txt(r, file_name)
         else:

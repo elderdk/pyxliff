@@ -62,6 +62,7 @@ def compare_and_compile_dict(min_match):
     
     The dict will contain all keys that match more than the min_match value.
     """
+
     tmp_files = Path(TEMP_FOLDER).glob('*')
     cnt = Counter()
 
@@ -86,12 +87,14 @@ def compare_and_compile_dict(min_match):
 
 def remove_partials(dd):
 
-    keys1 = [key for key in dd.keys()]
-    keys2 = [key for key in dd.keys()]
-    for key1 in keys1:
-        for key2 in keys2:
-            if key1 in key2 and key1 != key2 and key1 in dd:
-                dd.pop(key1)
+    keys = [key for key in dd.keys()]
+    
+    for i in range(0, len(keys)):
+        if len(keys) > i:
+            for n in range(1, 20):
+                if len(keys) > i + 20:
+                    if keys[i+n] in keys[i]:
+                        dd.pop(keys[i+n], None) 
 
     return dd
 
