@@ -70,7 +70,7 @@ def compare_and_compile_dict(min_match):
         keys = list()
         
         # creates a list of all keys in the tmp_file
-        with tmp_file.open() as f:
+        with tmp_file.open(encoding='utf-8') as f:
             last_line = ""
             lines = f.readlines()
             for line in lines[::-1]:

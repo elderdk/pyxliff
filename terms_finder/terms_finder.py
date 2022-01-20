@@ -50,7 +50,7 @@ class TermsFinder(QObject):
 
         for xliff in xliffs:
             print("working on ", xliff)
-            with tmpfile.open(mode='a') as f:
+            with tmpfile.open(mode='a', encoding='utf-8') as f:
                 for segment in xliff.segments:
                     analyze_segment(segment.source, max_lookup_length, f)
 
